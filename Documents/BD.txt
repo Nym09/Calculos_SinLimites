@@ -1,0 +1,243 @@
+-- Esquema SQL en español para MySQL (MySQL Workbench)
+-- Motor: InnoDB, Charset: utf8mb4
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS roles (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(50) NOT NULL UNIQUE,
+  descripcion VARCHAR(255)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS usuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre_completo VARCHAR(150) NOT NULL,
+  correo VARCHAR(150) NOT NULL UNIQUE,
+  contrasena_hash VARCHAR(255) NOT NULL,
+  telefono VARCHAR(30),
+  id_rol INT NOT NULL,
+  activo TINYINT(1) DEFAULT 1,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_usuarios_rol FOREIGN KEY (id_rol) REFERENCES roles(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS cursos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  titulo VARCHAR(150) NOT NULL,
+  descripcion TEXT,
+  creado_por INT,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  fecha_eliminacion DATETIME NULL,
+  CONSTRAINT fk_cursos_creador FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS cursos_profesores (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_curso INT NOT NULL,
+  id_profesor INT NOT NULL,
+  fecha_asignacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_curso_profesor (id_curso, id_profesor),
+  CONSTRAINT fk_cp_curso FOREIGN KEY (id_curso) REFERENCES cursos(id),
+  CONSTRAINT fk_cp_profesor FOREIGN KEY (id_profesor) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS cursos_estudiantes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_curso INT NOT NULL,
+  id_estudiante INT NOT NULL,
+  fecha_inscripcion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  estado ENUM('activo','inactivo','finalizado') DEFAULT 'activo',
+  UNIQUE KEY uq_curso_estudiante (id_curso, id_estudiante),
+  CONSTRAINT fk_ce_curso FOREIGN KEY (id_curso) REFERENCES cursos(id),
+  CONSTRAINT fk_ce_estudiante FOREIGN KEY (id_estudiante) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS actividades (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_curso INT NOT NULL,
+  titulo VARCHAR(200) NOT NULL,
+  descripcion TEXT,
+  fecha_vencimiento DATETIME,
+  puntos_max DECIMAL(6,2) DEFAULT 100.00,
+  creado_por INT,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  pistas_habilitadas TINYINT(1) DEFAULT 1,
+  tipo ENUM('propuesto','estudio','evaluacion') DEFAULT 'propuesto',
+  CONSTRAINT fk_actividades_curso FOREIGN KEY (id_curso) REFERENCES cursos(id),
+  CONSTRAINT fk_actividades_creador FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS pistas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_actividad INT NOT NULL,
+  orden INT NOT NULL DEFAULT 1,
+  texto TEXT NOT NULL,
+  penalizacion DECIMAL(6,2) DEFAULT 0.00,
+  UNIQUE KEY uq_actividad_pista_orden (id_actividad, orden),
+  CONSTRAINT fk_pistas_actividad FOREIGN KEY (id_actividad) REFERENCES actividades(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS intentos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_actividad INT NOT NULL,
+  id_estudiante INT NOT NULL,
+  numero_intento INT NOT NULL DEFAULT 1,
+  fecha_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
+  respuesta TEXT,
+  pasos_json JSON NULL,
+  grafico_url VARCHAR(255) NULL,
+  pistas_usadas INT DEFAULT 0,
+  nota_bruta DECIMAL(6,2) NULL,
+  nota_final DECIMAL(6,2) NULL,
+  estado ENUM('en_progreso','enviado','calificado') DEFAULT 'enviado',
+  CONSTRAINT fk_intentos_actividad FOREIGN KEY (id_actividad) REFERENCES actividades(id),
+  CONSTRAINT fk_intentos_estudiante FOREIGN KEY (id_estudiante) REFERENCES usuarios(id),
+  INDEX idx_intentos_actividad (id_actividad),
+  INDEX idx_intentos_estudiante (id_estudiante)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS comentarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_intento INT NOT NULL,
+  id_autor INT NOT NULL,
+  comentario TEXT NOT NULL,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_comentarios_intento FOREIGN KEY (id_intento) REFERENCES intentos(id),
+  CONSTRAINT fk_comentarios_autor FOREIGN KEY (id_autor) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS logs (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT NULL,
+  accion VARCHAR(150) NOT NULL,
+  detalles TEXT,
+  ip VARCHAR(50),
+  fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_logs_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS simbolos_teclado (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  simbolo VARCHAR(50) NOT NULL,
+  latex VARCHAR(200),
+  descripcion VARCHAR(255)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS recursos_actividad (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_actividad INT NOT NULL,
+  tipo ENUM('imagen','archivo','enlace','otro') DEFAULT 'archivo',
+  url VARCHAR(500) NOT NULL,
+  descripcion VARCHAR(255),
+  subido_por INT NULL,
+  fecha_subida DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_recursos_actividad FOREIGN KEY (id_actividad) REFERENCES actividades(id),
+  CONSTRAINT fk_recursos_usuario FOREIGN KEY (subido_por) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS notificaciones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT NOT NULL,
+  tipo VARCHAR(100) NOT NULL,
+  titulo VARCHAR(200) NOT NULL,
+  mensaje TEXT,
+  referencia_tipo VARCHAR(100) NULL,
+  referencia_id INT NULL,
+  leida TINYINT(1) DEFAULT 0,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_notificaciones_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS configuraciones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  alcance ENUM('global','curso','actividad','usuario') DEFAULT 'global',
+  id_alcance INT NULL,
+  clave VARCHAR(150) NOT NULL,
+  valor TEXT,
+  fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_configuracion (alcance, id_alcance, clave)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_actividades_curso ON actividades(id_curso);
+CREATE INDEX IF NOT EXISTS idx_intentos_estudiante_actividad ON intentos(id_estudiante, id_actividad);
+CREATE INDEX IF NOT EXISTS idx_inscripciones_curso ON cursos_estudiantes(id_curso);
+
+-- Fin del script original
+
+-- ==========================
+-- Extensiones para actividades auto-calificables y grader
+-- ==========================
+
+-- Añadir campos en actividades
+ALTER TABLE actividades
+  ADD COLUMN auto_calificable TINYINT(1) DEFAULT 0,
+  ADD COLUMN formato_respuesta ENUM('texto','numerico','latex','grafico','archivo','codigo') DEFAULT 'texto',
+  ADD COLUMN parametros JSON NULL,
+  ADD COLUMN dificultad ENUM('facil','medio','dificil') DEFAULT 'medio';
+
+-- Tabla para casos de prueba (pruebas automáticas)
+CREATE TABLE IF NOT EXISTS casos_prueba (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_actividad INT NOT NULL,
+  nombre VARCHAR(150) NULL,
+  entrada TEXT NULL,
+  salida_esperada TEXT NULL,
+  tipo ENUM('igual','numero','simbolico','grafico','regex') DEFAULT 'igual',
+  tolerancia DECIMAL(18,10) NULL,
+  peso DECIMAL(6,2) DEFAULT 1.00,
+  es_publico TINYINT(1) DEFAULT 0,
+  orden INT DEFAULT 1,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_cp_actividad FOREIGN KEY (id_actividad) REFERENCES actividades(id) ON DELETE CASCADE,
+  INDEX idx_casos_actividad (id_actividad)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Tabla para almacenar respuestas/soluciones modelo
+CREATE TABLE IF NOT EXISTS respuestas_modelo (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_actividad INT NOT NULL,
+  tipo ENUM('respuesta_unica','multiple','explicacion','hash') DEFAULT 'respuesta_unica',
+  contenido TEXT NOT NULL,
+  hash_respuesta VARCHAR(255) NULL,
+  tolerancia DECIMAL(18,10) NULL,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_rm_actividad FOREIGN KEY (id_actividad) REFERENCES actividades(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Registros del grader / ejecuciones automáticas
+CREATE TABLE IF NOT EXISTS ejecuciones_grader (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  id_intento INT NOT NULL,
+  id_caso_prueba INT NULL,
+  estado ENUM('pendiente','ejecucion','exitoso','fallido','error') DEFAULT 'pendiente',
+  salida TEXT NULL,
+  tiempo_ejecucion_ms INT NULL,
+  fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_eg_intento FOREIGN KEY (id_intento) REFERENCES intentos(id) ON DELETE CASCADE,
+  CONSTRAINT fk_eg_caso FOREIGN KEY (id_caso_prueba) REFERENCES casos_prueba(id) ON DELETE SET NULL,
+  INDEX idx_eg_intento (id_intento)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Mejorar intentos para detalle de calificación
+ALTER TABLE intentos
+  ADD COLUMN detalle_calificacion JSON NULL,
+  ADD COLUMN nota_pruebas DECIMAL(6,2) NULL,
+  ADD COLUMN nota_pistas DECIMAL(6,2) NULL,
+  ADD COLUMN tiempo_ejecucion_ms INT NULL;
+
+-- Tabla para rubricas (opcional)
+CREATE TABLE IF NOT EXISTS rubricas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(150) NOT NULL,
+  descripcion TEXT,
+  reglas JSON NOT NULL,
+  creado_por INT NULL,
+  fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_rubrica_usuario FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Fin de extensiones

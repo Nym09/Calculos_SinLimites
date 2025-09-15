@@ -1,0 +1,64 @@
+----------------------------------------------------------------------------------------------------
+Autenticación y Roles
+
+El sistema debe permitir registro, inicio y cierre de sesión de usuarios.
+
+El sistema debe diferenciar entre roles de usuario: estudiante y profesor.
+
+El sistema debe gestionar perfiles de usuario, mostrando puntos acumulados, ejercicios realizados y progreso.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Admin
+
+-Creacion de usuarios profesores
+-Logs
+-Permisos
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Estudiantes
+
+-Apartado ejercicios propuestos por profesor 
+
+Ejercicio -fecha de vencimiento-puntos maximos
+
+El sistema debe ofrecer pistas escalonadas para ayudar a resolver un ejercicio.
+
+El sistema debe registrar el uso de pistas y reflejarlo en la calificación o puntaje.
+
+El sistema debe mostrar comentarios o retroalimentación del profesor en los ejercicios realizados.
+
+
+
+-Apartado para crear ejercicios 
+El sistema debe permitir a los estudiantes ingresar una función y un valor c para calcular un límite.
+
+El sistema debe mostrar la gráfica de la función y señalar el valor c.
+
+El sistema debe mostrar el resultado del límite y, en caso de ser posible, los pasos intermedios para su cálculo.
+
+Tecleado digital con simbolos o caracteres a usar(ejemplo Mathway)
+
+
+
+-Apartado ejercicios estudio propio(dividido por tipos de limites)
+Funcion
+Pistas para resolver la funcion
+	Formula
+	Reemplazo de valores
+	Dar resultado, con paso a paso (grafica opcional y graficos de eleccion para puntos)
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+PROFESORES
+
+El sistema debe permitir a los profesores crear y asignar ejercicios a sus cursos.
+
+El sistema debe permitir visualizar los estudiantes inscritos en un curso.
+
+El sistema debe mostrar el porcentaje de éxito de cada ejercicio en los estudiantes.
+
+El sistema debe permitir a los profesores revisar los intentos de los estudiantes, incluyendo uso de pistas y pasos seguidos.
+
+El sistema debe permitir asignar calificación y comentarios de mejora a cada intento de estudiante.
+
+-Reportes y Estadísticas
+
+El sistema debe generar estadísticas de rendimiento por estudiante y por ejercicio.
+
+El sistema debe permitir a los profesores exportar reportes en formatos como CSV o PDF.
