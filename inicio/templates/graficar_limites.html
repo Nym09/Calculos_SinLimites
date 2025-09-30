@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous"
+    />
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+        rel="stylesheet"
+    />
+    <title>Graficar Límites</title>
+    <link rel="stylesheet" href="{% static 'css/graficar.css' %}" />
+
+    <style>
+        /* Evita scroll horizontal */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+        .cuerpo{
+          padding-top: 5%;
+        }
+        /* From Uiverse.io by opMorn */
+        .input-container {
+            position: relative;
+            margin: 20px auto;
+            width: 100%;
+        }
+
+        .input-container input[type="text"] {
+            font-size: 20px;
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #006aff;
+            padding: 20px 0;
+            background-color: transparent;
+            outline: none;
+            
+        }
+
+        .input-container .label {
+            position: absolute;
+            top: 0;
+            left: 5%;
+            color: #006aff;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            font-weight: bold;
+        }
+
+        .input-container input[type="text"]:focus ~ .label,
+        .input-container input[type="text"]:valid ~ .label {
+            top: -20px;
+            left: 5%;
+            font-size: 16px;
+            font-weight: bold;
+            color: #006aff;
+        }
+
+        .input-container .underline {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            width: 100%;
+            background-color: #006aff;
+            transform: scaleX(0);
+            transition: all 0.3s ease;
+        }
+
+        .input-container input[type="text"]:focus ~ .underline,
+        .input-container input[type="text"]:valid ~ .underline {
+            transform: scaleX(1);
+        }
+
+        /* From Uiverse.io by vinodjangid07 */
+        .button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 8px;
+            background-color: #006aff;
+            border: 4px solid #c0dfff;
+            color: white;
+            gap: 6px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: fit-content;
+            margin: 5% 0 0 auto;
+        }
+
+        .text {
+            font-size: 1em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .svg {
+            padding-top: 3px;
+        }
+
+        .svg svg {
+            width: 24px;
+            height: 16px;
+        }
+
+        .button:hover {
+            border: 8px solid #b1d8ff;
+            background-color: #1b7aff;
+        }
+
+        .button:active {
+            border: 5px solid #c0dfff;
+        }
+
+        .button:hover .svg svg {
+            animation: jello-vertical 0.9s both;
+            transform-origin: left;
+        }
+
+        @keyframes jello-vertical {
+            0% { transform: scale3d(1, 1, 1); }
+            30% { transform: scale3d(0.75, 1.25, 1); }
+            40% { transform: scale3d(1.25, 0.75, 1); }
+            50% { transform: scale3d(0.85, 1.15, 1); }
+            65% { transform: scale3d(1.05, 0.95, 1); }
+            75% { transform: scale3d(0.95, 1.05, 1); }
+            100% { transform: scale3d(1, 1, 1); }
+        }
+
+        .contenido {
+            background-color: #006aff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {% include 'nav.html' %}
+    </header>
+
+    <main>
+      <div class="container cuerpo">
+         <div class="row">
+            <div class="col-md-2 border-end" height="100%">
+                <!-- Formulario -->
+                <form method="post" action="{% url 'limites' %}" class="function-form">
+                    {% csrf_token %}
+
+                    <div class="input-container" id="function">
+                        <input required id="input" type="text" name="funcion" />
+                        <label class="label" for="input">Función</label>
+                        <div class="underline"></div>
+                    </div>
+
+                    <div class="input-container">
+                        <input id="c_input" type="text" name="c" value="0" />
+                        <label class="label" for="c_input">Valor de c</label>
+                        <div class="underline"></div>
+                    </div>
+
+                    <button type="submit" class="button">
+                        <span class="text">Discover</span>
+                        <span class="svg">
+                            <!-- icono pequeño -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 15" fill="none">
+                                <path fill="white" d="M10 7.519l-.939-.344h0l.939.344z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-md-10">
+                <div class="card p-3">
+                    <h5>Función: {{ funcion|default:"-" }}</h5>
+                    <p>Valor de c: {{ c|default:"0" }}</p>
+                    <p>Resultado del límite: <strong>{{ limite }}</strong></p>
+
+                    <div id="plotly-div" style="height:500px;"></div>
+
+                    {% if error %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
+                    {% if limite_error %}
+                        <div class="alert alert-warning">{{ limite_error }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- añadir Plotly CDN -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <script>
+        // obtener arrays enviados desde la vista
+        const xs = {{ x_json|default:"null" }};
+        const ys = {{ y_json|default:"null" }};
+
+        if (xs && ys) {
+            // Plotly ignora null en datos; es útil para discontinuidades
+            const trace = {
+                x: xs,
+                y: ys,
+                mode: 'lines',
+                name: 'f(x)',
+                line: { width: 2 }
+            };
+
+            const c_val = parseFloat("{{ c|default:'0' }}");
+            const layout = {
+                title: 'Gráfica de la función',
+                xaxis: { title: 'x' },
+                yaxis: { title: 'f(x)', autorange: true },
+                showlegend: true,
+                margin: { t: 40, b: 40 }
+            };
+
+            Plotly.newPlot('plotly-div', [trace], layout, { responsive: true });
+
+            // opcional: añadir marcador del punto c aproximado usando el primer punto finito cercano
+            let nearestY = null;
+            for (let i = 0; i < xs.length; i++) {
+                if (ys[i] !== null && !isNaN(ys[i])) {
+                    nearestY = ys[i];
+                    break;
+                }
+            }
+            if (nearestY !== null) {
+                const marker = {
+                    x: [c_val],
+                    y: [nearestY],
+                    mode: 'markers',
+                    marker: { size: 8, symbol: 'circle' },
+                    name: 'punto cercano a c'
+                };
+                Plotly.addTraces('plotly-div', marker);
+            }
+        }
+    </script>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"
+    ></script>
+</body>
+</html>
