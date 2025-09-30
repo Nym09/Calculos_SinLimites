@@ -1,0 +1,130 @@
+html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+        .cuerpo{
+          padding-top: 2%;
+        }
+        .boton {
+            border-radius: 100%;
+            border: 2px solid rgb(113, 203, 255);
+            width: 50px;      
+            height: 50px;     
+            font-size: 24px;  
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* From Uiverse.io by opMorn */
+        .input-container {
+            position: relative;
+            margin: 20px auto;
+            width: 100%;
+        }
+
+        .input-container input[type="text"] {
+            font-size: 20px;
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #006aff;
+            padding: 20px 0;
+            background-color: transparent;
+            outline: none;
+            
+        }
+
+        .input-container .label {
+            position: absolute;
+            top: 0;
+            left: 5%;
+            color: #006aff;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            font-weight: bold;
+        }
+
+        .input-container input[type="text"]:focus ~ .label,
+        .input-container input[type="text"]:valid ~ .label {
+            top: -20px;
+            left: 5%;
+            font-size: 16px;
+            font-weight: bold;
+            color: #006aff;
+        }
+
+        .input-container .underline {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            width: 100%;
+            background-color: #006aff;
+            transform: scaleX(0);
+            transition: all 0.3s ease;
+        }
+
+        .input-container input[type="text"]:focus ~ .underline,
+        .input-container input[type="text"]:valid ~ .underline {
+            transform: scaleX(1);
+        }
+
+        /* From Uiverse.io by vinodjangid07 */
+        .button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 8px;
+            background-color: #006aff;
+            border: 4px solid #c0dfff;
+            color: white;
+            gap: 6px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: fit-content;
+            margin: 5% 0 0 auto;
+        }
+
+        .text {
+            font-size: 1em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .svg {
+            padding-top: 3px;
+        }
+
+        .svg svg {
+            width: 24px;
+            height: 16px;
+        }
+
+        .button:hover {
+            border: 8px solid #b1d8ff;
+            background-color: #1b7aff;
+        }
+
+        .button:active {
+            border: 5px solid #c0dfff;
+        }
+
+        .button:hover .svg svg {
+            animation: jello-vertical 0.9s both;
+            transform-origin: left;
+        }
+
+        @keyframes jello-vertical {
+            0% { transform: scale3d(1, 1, 1); }
+            30% { transform: scale3d(0.75, 1.25, 1); }
+            40% { transform: scale3d(1.25, 0.75, 1); }
+            50% { transform: scale3d(0.85, 1.15, 1); }
+            65% { transform: scale3d(1.05, 0.95, 1); }
+            75% { transform: scale3d(0.95, 1.05, 1); }
+            100% { transform: scale3d(1, 1, 1); }
+        }
+
+        .contenido {
+            background-color: #006aff;
+        }

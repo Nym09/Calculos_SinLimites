@@ -1,256 +1,340 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     {% load static %}
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-        crossorigin="anonymous"
-    />
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-        rel="stylesheet"
-    />
-    <title>Graficar Límites</title>
-    <link rel="stylesheet" href="{% static 'css/graficar.css' %}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <title>Graficar — Límites</title>
+
+    <link rel="stylesheet" href="{% static 'css/graficar_limites.css' %}?v=1.2">
 
     <style>
-        /* Evita scroll horizontal */
-        html, body {
-            overflow-x: hidden;
-            max-width: 100%;
-        }
-        .cuerpo{
-          padding-top: 5%;
-        }
-        /* From Uiverse.io by opMorn */
-        .input-container {
-            position: relative;
-            margin: 20px auto;
-            width: 100%;
-        }
+      /* SIDEBAR / ASIDE */
+      aside.form-aside {
+        height: 82vh; /* deja espacio para header */
+        position: sticky;
+        top: 8vh;
+        padding: 1rem;
+        background: #fff;
+        border-radius: .5rem;
+        box-shadow: 0 6px 18px rgba(0,0,0,.04);
+        overflow-y: auto;
+      }
 
-        .input-container input[type="text"] {
-            font-size: 20px;
-            width: 100%;
-            border: none;
-            border-bottom: 2px solid #006aff;
-            padding: 20px 0;
-            background-color: transparent;
-            outline: none;
-            
-        }
+      .aside-top {
+        display:flex;
+        gap:.5rem;
+        align-items:center;
+        justify-content:space-between;
+        margin-bottom:.75rem;
+      }
 
-        .input-container .label {
-            position: absolute;
-            top: 0;
-            left: 5%;
-            color: #006aff;
-            transition: all 0.3s ease;
-            pointer-events: none;
-            font-weight: bold;
-        }
+      .boton {
+        border-radius: 100%;
+        border: 2px solid rgb(113, 203, 255);
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-        .input-container input[type="text"]:focus ~ .label,
-        .input-container input[type="text"]:valid ~ .label {
-            top: -20px;
-            left: 5%;
-            font-size: 16px;
-            font-weight: bold;
-            color: #006aff;
-        }
+      .add-btn {
+        display:inline-flex;
+        align-items:center;
+        gap:.35rem;
+      }
 
-        .input-container .underline {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 2px;
-            width: 100%;
-            background-color: #006aff;
-            transform: scaleX(0);
-            transition: all 0.3s ease;
-        }
+      #inputs-container .input-row {
+        display:flex;
+        gap:.5rem;
+        align-items:flex-start;
+        margin-bottom:.6rem;
+      }
 
-        .input-container input[type="text"]:focus ~ .underline,
-        .input-container input[type="text"]:valid ~ .underline {
-            transform: scaleX(1);
-        }
+      .input-row .input-container {
+        flex: 1 1 auto;
+        display:flex;
+        flex-direction:column;
+      }
 
-        /* From Uiverse.io by vinodjangid07 */
-        .button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 3px 8px;
-            background-color: #006aff;
-            border: 4px solid #c0dfff;
-            color: white;
-            gap: 6px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: fit-content;
-            margin: 5% 0 0 auto;
-        }
+      .input-row .input-container input {
+        padding:.45rem .6rem;
+        border-radius:.35rem;
+        border:1px solid #dfe6ef;
+      }
 
-        .text {
-            font-size: 1em;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
+      .remove-btn {
+        border: none;
+        background: transparent;
+        color: #d6333f;
+        font-size: 18px;
+        cursor: pointer;
+        padding: .15rem .4rem;
+        line-height: 1;
+        align-self:center;
+      }
 
-        .svg {
-            padding-top: 3px;
-        }
+      .submit-row {
+        display:flex;
+        gap:.5rem;
+        align-items:center;
+        margin-top: .75rem;
+      }
 
-        .svg svg {
-            width: 24px;
-            height: 16px;
+      /* móvil: aside ocupa toda la fila arriba del plot */
+      @media (max-width: 767px) {
+        aside.form-aside {
+          position: static;
+          height: auto;
+          margin-bottom: 1rem;
         }
-
-        .button:hover {
-            border: 8px solid #b1d8ff;
-            background-color: #1b7aff;
-        }
-
-        .button:active {
-            border: 5px solid #c0dfff;
-        }
-
-        .button:hover .svg svg {
-            animation: jello-vertical 0.9s both;
-            transform-origin: left;
-        }
-
-        @keyframes jello-vertical {
-            0% { transform: scale3d(1, 1, 1); }
-            30% { transform: scale3d(0.75, 1.25, 1); }
-            40% { transform: scale3d(1.25, 0.75, 1); }
-            50% { transform: scale3d(0.85, 1.15, 1); }
-            65% { transform: scale3d(1.05, 0.95, 1); }
-            75% { transform: scale3d(0.95, 1.05, 1); }
-            100% { transform: scale3d(1, 1, 1); }
-        }
-
-        .contenido {
-            background-color: #006aff;
-        }
+      }
     </style>
 </head>
 <body>
-    <header>
-        {% include 'nav.html' %}
-    </header>
-
-    <main>
-      <div class="container cuerpo">
-         <div class="row">
-            <div class="col-md-2 border-end" height="100%">
-                <!-- Formulario -->
-                <form method="post" action="{% url 'limites' %}" class="function-form">
-                    {% csrf_token %}
-
-                    <div class="input-container" id="function">
-                        <input required id="input" type="text" name="funcion" />
-                        <label class="label" for="input">Función</label>
-                        <div class="underline"></div>
-                    </div>
-
-                    <div class="input-container">
-                        <input id="c_input" type="text" name="c" value="0" />
-                        <label class="label" for="c_input">Valor de c</label>
-                        <div class="underline"></div>
-                    </div>
-
-                    <button type="submit" class="button">
-                        <span class="text">Discover</span>
-                        <span class="svg">
-                            <!-- icono pequeño -->
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 15" fill="none">
-                                <path fill="white" d="M10 7.519l-.939-.344h0l.939.344z"></path>
-                            </svg>
-                        </span>
-                    </button>
-                </form>
-            </div>
-
-            <div class="col-md-10">
-                <div class="card p-3">
-                    <h5>Función: {{ funcion|default:"-" }}</h5>
-                    <p>Valor de c: {{ c|default:"0" }}</p>
-                    <p>Resultado del límite: <strong>{{ limite }}</strong></p>
-
-                    <div id="plotly-div" style="height:500px;"></div>
-
-                    {% if error %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                    {% endif %}
-                    {% if limite_error %}
-                        <div class="alert alert-warning">{{ limite_error }}</div>
-                    {% endif %}
-                </div>
-            </div>
+  <header>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          {% include 'nav.html' %}
         </div>
       </div>
-    </main>
+    </div>
+  </header>
 
-    <!-- añadir Plotly CDN -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <main class="py-4">
+    <div class="container">
+      <div class="row gx-4">
+        <!-- ASIDE: formulario (mejorado) -->
+        <aside class="col-lg-3 col-md-4 mb-3">
+          <aside class="form-aside" aria-labelledby="aside-title">
+            <div class="aside-top">
+              <h6 id="aside-title" class="mb-0">Funciones</h6>
 
-    <script>
-        // obtener arrays enviados desde la vista
-        const xs = {{ x_json|default:"null" }};
-        const ys = {{ y_json|default:"null" }};
+              <!-- Botón + -->
+              <button id="newfuncion" type="button" class="btn btn-sm btn-outline-primary boton" title="Agregar función" aria-label="Agregar función">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i>
+              </button>
+            </div>
 
-        if (xs && ys) {
-            // Plotly ignora null en datos; es útil para discontinuidades
-            const trace = {
-                x: xs,
-                y: ys,
-                mode: 'lines',
-                name: 'f(x)',
-                line: { width: 2 }
-            };
+            <form id="form_functions" method="post" action="{% url 'limites' %}" class="function-form" novalidate>
+              {% csrf_token %}
 
-            const c_val = parseFloat("{{ c|default:'0' }}");
-            const layout = {
-                title: 'Gráfica de la función',
-                xaxis: { title: 'x' },
-                yaxis: { title: 'f(x)', autorange: true },
-                showlegend: true,
-                margin: { t: 40, b: 40 }
-            };
+              <!-- Contenedor de inputs dinámicos -->
+              <div id="inputs-container" aria-live="polite">
+                <!-- FILA BASE: par (función, c) -->
+                <div class="input-row" data-row-index="0">
+                  <div class="input-container">
+                    <label class="form-label visually-hidden" for="funcion-0">Función</label>
+                    <input required id="funcion-0" type="text" name="funcion[]" placeholder="ej. sin(x)/x" aria-label="Función" />
+                  </div>
 
-            Plotly.newPlot('plotly-div', [trace], layout, { responsive: true });
+                  <div class="input-container" style="max-width:110px;">
+                    <label class="form-label visually-hidden" for="c-0">c</label>
+                    <input id="c-0" type="text" name="c[]" value="0" placeholder="c" aria-label="Valor de c" />
+                  </div>
 
-            // opcional: añadir marcador del punto c aproximado usando el primer punto finito cercano
+                  <!-- El primer row puede tener botón X, opcional -->
+                  <button type="button" class="remove-btn" title="Eliminar esta función" aria-label="Eliminar función">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Acciones -->
+              <div class="submit-row">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="bi bi-calculator me-1"></i> Calcular límites
+                </button>
+              </div>
+
+              <small class="text-muted d-block mt-2">Puedes agregar varias funciones :)</small>
+            </form>
+          </aside>
+        </aside>
+
+        <!-- MAIN content: gráfico y resultados -->
+        <section class="col-lg-9 col-md-8">
+          <div class="card p-3">
+            <h5 class="mb-1">Resultados</h5>
+
+            {% if resultados %}
+              <ul class="list-group mb-2">
+                {% for r in resultados %}
+                  <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <strong>{{ r.funcion }}</strong>
+                        <div class="small text-muted">c = {{ r.c }}</div>
+                        <div>límite: <strong>{{ r.limite|default:"No disponible" }}</strong></div>
+                        {% if r.error %}
+                          <div class="text-danger small">Error: {{ r.error }}</div>
+                        {% endif %}
+                      </div>
+                      <div class="text-end small">
+                        {% if r.limite %}
+                          <span class="badge bg-success">Límite calculado</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-muted">No hay resultados aún. Introduce una o más funciones y pulsa "Calcular límites".</p>
+            {% endif %}
+
+            <div id="plotly-div" style="height:500px;"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Plotly -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+  {# Exportar resultados completos como JSON de forma segura #}
+  {% if resultados %}
+    {{ resultados|json_script:"resultados-data" }}
+  {% endif %}
+
+  <!-- Script para añadir/eliminar inputs y graficar múltiples funciones -->
+  <script>
+  (function () {
+    // ===== inputs dinámicos =====
+    let nextIndex = 1; // ya existe el índice 0
+    const addBtn = document.getElementById('newfuncion');
+    const container = document.getElementById('inputs-container');
+
+    // delegación para eliminar (también cubre el primer botón X)
+    container.addEventListener('click', function(e) {
+      const btn = e.target.closest('.remove-btn, .remove-btn *');
+      if (!btn) return;
+      const row = btn.closest('.input-row');
+      if (!row) return;
+
+      // si solo queda un input-row, limpiar en vez de eliminar
+      const rows = container.querySelectorAll('.input-row');
+      if (rows.length <= 1) {
+        row.querySelectorAll('input').forEach(i => i.value = '');
+      } else {
+        row.remove();
+      }
+    });
+
+    addBtn.addEventListener('click', function () {
+      const row = document.createElement('div');
+      row.className = 'input-row';
+      row.dataset.rowIndex = nextIndex;
+
+      row.innerHTML = `
+        <div class="input-container">
+          <label class="form-label visually-hidden" for="funcion-${nextIndex}">Función</label>
+          <input required id="funcion-${nextIndex}" type="text" name="funcion[]" placeholder="ej. x**2+1" aria-label="Función" />
+        </div>
+
+        <div class="input-container" style="max-width:110px;">
+          <label class="form-label visually-hidden" for="c-${nextIndex}">c</label>
+          <input id="c-${nextIndex}" type="text" name="c[]" value="0" placeholder="c" aria-label="Valor de c" />
+        </div>
+
+        <button type="button" class="remove-btn" title="Eliminar esta función" aria-label="Eliminar función">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      `;
+
+      container.appendChild(row);
+      row.querySelector('input').focus();
+      nextIndex++;
+    });
+
+    // ===== Plotly: graficar los resultados exportados por json_script =====
+    try {
+      const resultadosElem = document.getElementById('resultados-data');
+      if (resultadosElem) {
+        let resultados = [];
+        try {
+          resultados = JSON.parse(resultadosElem.textContent || '[]');
+        } catch (e) {
+          console.error('No se pudo parsear resultados-data:', e);
+          resultados = [];
+        }
+
+        const traces = [];
+        resultados.forEach((r, idx) => {
+          let xs = r.x_json;
+          let ys = r.y_json;
+
+          // si vinieron como strings JSON (por seguridad), intentar parsear
+          if (typeof xs === 'string') {
+            try { xs = JSON.parse(xs); } catch(e) { xs = null; }
+          }
+          if (typeof ys === 'string') {
+            try { ys = JSON.parse(ys); } catch(e) { ys = null; }
+          }
+
+          if (!Array.isArray(xs) || !Array.isArray(ys) || xs.length !== ys.length) {
+            console.warn('Datos inválidos para la función:', r.funcion);
+            return;
+          }
+
+          traces.push({
+            x: xs,
+            y: ys,
+            mode: 'lines',
+            name: r.funcion || `f${idx+1}(x)`,
+            line: { width: 2 }
+          });
+
+          // marcar aproximación en c (primer y finito cercano)
+          const cval = parseFloat(r.c);
+          if (!Number.isNaN(cval)) {
             let nearestY = null;
             for (let i = 0; i < xs.length; i++) {
-                if (ys[i] !== null && !isNaN(ys[i])) {
-                    nearestY = ys[i];
-                    break;
-                }
+              if (ys[i] !== null && ys[i] !== undefined && !isNaN(ys[i]) && isFinite(ys[i])) {
+                nearestY = ys[i];
+                break;
+              }
             }
             if (nearestY !== null) {
-                const marker = {
-                    x: [c_val],
-                    y: [nearestY],
-                    mode: 'markers',
-                    marker: { size: 8, symbol: 'circle' },
-                    name: 'punto cercano a c'
-                };
-                Plotly.addTraces('plotly-div', marker);
+              traces.push({
+                x: [cval],
+                y: [nearestY],
+                mode: 'markers',
+                name: `c (${r.funcion})`,
+                marker: { size: 8, symbol: 'circle' }
+              });
             }
-        }
-    </script>
+          }
+        });
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"
-    ></script>
+        const plotEl = document.getElementById('plotly-div');
+        if (plotEl) {
+          if (traces.length > 0) {
+            const layout = {
+              title: 'Gráficas de funciones',
+              xaxis: { title: 'x' },
+              yaxis: { title: 'f(x)', autorange: true },
+              showlegend: true,
+              margin: { t: 40, b: 40 }
+            };
+            Plotly.newPlot(plotEl, traces, layout, { responsive: true });
+          } else {
+            plotEl.innerHTML = '<p class="text-muted">No hay funciones válidas para graficar.</p>';
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error al inicializar la gráfica:", err);
+    }
+  })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
